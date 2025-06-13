@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const { PrismaClient } = require("@prisma/client");
 const criteriaRoutes = require("./routes/criteriaRoutes");
 const alternativeRoutes = require("./routes/alternativeRoutes");
+const subCriteriaRoutes = require("./routes/subCriteriaRoutes");
 
 require("dotenv").config();
 
@@ -26,6 +27,7 @@ app.use(express.json());
 // Routes
 app.use("/api/criteria", criteriaRoutes);
 app.use("/api/alternatives", alternativeRoutes);
+app.use("/api/sub-criteria", subCriteriaRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

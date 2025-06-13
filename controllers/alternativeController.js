@@ -18,16 +18,7 @@ const createAlternative = async (req, res) => {
 // Get all alternatives
 const getAllAlternatives = async (req, res) => {
   try {
-    const alternatives = await prisma.alternative.findMany({
-      include: {
-        ratings: {
-          include: {
-            criteria: true,
-          },
-        },
-        weightedPref: true,
-      },
-    });
+    const alternatives = await prisma.alternative.findMany();
 
     res.status(200).json(alternatives);
   } catch (error) {
@@ -42,14 +33,6 @@ const getAlternativeById = async (req, res) => {
 
     const alternative = await prisma.alternative.findUnique({
       where: { id: parseInt(id) },
-      include: {
-        ratings: {
-          include: {
-            criteria: true,
-          },
-        },
-        weightedPref: true,
-      },
     });
 
     if (!alternative) {

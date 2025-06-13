@@ -14,48 +14,26 @@ model Criteria {
   weight Float
 
   // Relations
-  ratings Rating[]
+  subCriteria SubCriteria[]
 
   @@map("criteria")
 }
 
 model Alternative {
-  id            Int    @id @default(autoincrement())
-  name          String
-
-  // Relations
-  ratings       Rating[]
-  weightedPref  WeightedPref? // One-to-one (optional)
+  id   Int    @id @default(autoincrement())
+  name String
 
   @@map("alternative")
 }
 
-model Rating {
-  id    Int   @id @default(autoincrement())
-  score Float // Raw score for the criteria
-
-  // Foreign Keys
-  criteriaId    Int
-  alternativeId Int
+model SubCriteria {
+  id          Int    @id @default(autoincrement())
+  criteriaId  Int
+  realValue   String
+  ratingValue Int
 
   // Relations
-  criteria    Criteria    @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
-  alternative Alternative @relation(fields: [alternativeId], references: [id], onDelete: Cascade)
+  criteria Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
 
-  // Ensure unique rating per criteria-alternative pair
-  @@unique([criteriaId, alternativeId])
-  @@map("ratings")
-}
-
-model WeightedPref {
-  id            Int   @id @default(autoincrement())
-  weightedScore Float
-
-  // Foreign Key (unique for one-to-one)
-  alternativeId Int @unique
-
-  // Relations
-  alternative Alternative @relation(fields: [alternativeId], references: [id], onDelete: Cascade)
-
-  @@map("weighted_pref")
+  @@map("sub_criteria")
 }

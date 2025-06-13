@@ -3,10 +3,20 @@ const prisma = require("../models/prisma");
 // Create a new criteria
 const createCriteria = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, weight } = req.body;
+
+    // Validate required fields
+    if (!name || weight === undefined) {
+      return res.status(400).json({
+        error: "Name and weight are required fields",
+      });
+    }
 
     const criteria = await prisma.criteria.create({
-      data: { name },
+      data: {
+        name,
+        weight: parseFloat(weight),
+      },
     });
 
     res.status(201).json(criteria);
@@ -20,11 +30,7 @@ const getAllCriteria = async (req, res) => {
   try {
     const criteria = await prisma.criteria.findMany({
       include: {
-        ratings: {
-          include: {
-            alternative: true,
-          },
-        },
+        subCriteria: true,
       },
     });
 
@@ -42,11 +48,7 @@ const getCriteriaById = async (req, res) => {
     const criteria = await prisma.criteria.findUnique({
       where: { id: parseInt(id) },
       include: {
-        ratings: {
-          include: {
-            alternative: true,
-          },
-        },
+        subCriteria: true,
       },
     });
 
@@ -64,11 +66,15 @@ const getCriteriaById = async (req, res) => {
 const updateCriteria = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, weight } = req.body;
+
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (weight !== undefined) updateData.weight = parseFloat(weight);
 
     const criteria = await prisma.criteria.update({
       where: { id: parseInt(id) },
-      data: { name },
+      data: updateData,
     });
 
     res.status(200).json(criteria);
