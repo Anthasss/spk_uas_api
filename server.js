@@ -3,11 +3,13 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const { PrismaClient } = require("@prisma/client");
+const criteriaRoutes = require("./routes/criteriaRoutes");
+const alternativeRoutes = require("./routes/alternativeRoutes");
 
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const prisma = new PrismaClient();
 
 // Middleware
@@ -21,31 +23,14 @@ app.use(
 app.use(morgan("combined"));
 app.use(express.json());
 
-// Basic route
-app.get("/", (req, res) => {
-  res.json({ message: "SPK UAS API is running!" });
-});
+// Routes
+app.use("/api/criteria", criteriaRoutes);
+app.use("/api/alternatives", alternativeRoutes);
 
-// Example API routes
-app.get("/api/users", async (req, res) => {
-  try {
-    const users = await prisma.user.findMany();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch users" });
-  }
-});
-
-app.post("/api/users", async (req, res) => {
-  try {
-    const { email, name } = req.body;
-    const user = await prisma.user.create({
-      data: { email, name },
-    });
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to create user" });
-  }
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
 });
 
 // Graceful shutdown
