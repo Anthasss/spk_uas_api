@@ -3,7 +3,7 @@ const prisma = require("../models/prisma");
 // Create a new criteria
 const createCriteria = async (req, res) => {
   try {
-    const { name, weight } = req.body;
+    const { name, weight, type } = req.body;
 
     // Validate required fields
     if (!name || weight === undefined) {
@@ -12,10 +12,18 @@ const createCriteria = async (req, res) => {
       });
     }
 
+    // Validate type if provided
+    if (type && !["COST", "BENEFIT"].includes(type)) {
+      return res.status(400).json({
+        error: "Type must be either 'COST' or 'BENEFIT'",
+      });
+    }
+
     const criteria = await prisma.criteria.create({
       data: {
         name,
         weight: parseFloat(weight),
+        ...(type && { type }), // Include type if provided, otherwise use default
       },
     });
 
@@ -66,11 +74,19 @@ const getCriteriaById = async (req, res) => {
 const updateCriteria = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, weight } = req.body;
+    const { name, weight, type } = req.body;
+
+    // Validate type if provided
+    if (type && !["COST", "BENEFIT"].includes(type)) {
+      return res.status(400).json({
+        error: "Type must be either 'COST' or 'BENEFIT'",
+      });
+    }
 
     const updateData = {};
     if (name !== undefined) updateData.name = name;
     if (weight !== undefined) updateData.weight = parseFloat(weight);
+    if (type !== undefined) updateData.type = type;
 
     const criteria = await prisma.criteria.update({
       where: { id: parseInt(id) },

@@ -9,12 +9,14 @@ datasource db {
 
 // SMART Analysis Models
 model Criteria {
-  id     Int    @id @default(autoincrement())
+  id     Int        @id @default(autoincrement())
   name   String
   weight Float
+  type   CriteriaType @default(BENEFIT) // New field
 
   // Relations
-  subCriteria SubCriteria[]
+  subCriteria        SubCriteria[]
+  alternativeRatings AlternativeRating[]
 
   @@map("criteria")
 }
@@ -22,6 +24,9 @@ model Criteria {
 model Alternative {
   id   Int    @id @default(autoincrement())
   name String
+
+  // Relations
+  alternativeRatings AlternativeRating[]
 
   @@map("alternative")
 }
@@ -33,7 +38,29 @@ model SubCriteria {
   ratingValue Int
 
   // Relations
-  criteria Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+  criteria           Criteria            @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+  alternativeRatings AlternativeRating[]
 
   @@map("sub_criteria")
+}
+
+model AlternativeRating {
+  id                Int @id @default(autoincrement())
+  criteriaId        Int
+  subCriteriaId     Int 
+  alternativeId     Int
+
+  // Relations
+  criteria    Criteria    @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+  subCriteria SubCriteria @relation(fields: [subCriteriaId], references: [id], onDelete: Cascade)
+  alternative Alternative @relation(fields: [alternativeId], references: [id], onDelete: Cascade)
+
+  // Ensure unique rating per criteria-subcriteria-alternative combination
+  @@unique([criteriaId, subCriteriaId, alternativeId])
+  @@map("alternative_rating")
+}
+
+enum CriteriaType {
+  COST
+  BENEFIT
 }
